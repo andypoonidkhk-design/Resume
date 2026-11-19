@@ -1,6 +1,3 @@
-# app.py
-# Run with: streamlit run app.py
-
 import streamlit as st
 
 # ---------------------------------------------------------------
@@ -11,53 +8,94 @@ st.set_page_config(
     page_icon="📄",
     layout="centered",
 )
+# Bright mode is the default.
+if "dark_mode" not in st.session_state:
+    st.session_state.dark_mode = True
+
+button_label = "🌙 Switch to dark mode" if not st.session_state.dark_mode else "☀️ Switch to bright mode"
+
+if st.button(button_label, key="theme_toggle"):
+    st.session_state.dark_mode = not st.session_state.dark_mode
+    st.rerun()
+
+dark_mode = st.session_state.dark_mode
+dark_mode = st.session_state.get("dark_mode", True)
+
+bg_color = "#111827" if dark_mode else "#FFFFFF"
+text_color = "#F3F4F6" if dark_mode else "#000000"
+rule_color = "#9CA3AF" if dark_mode else "#000000"
+# ---------------------------------------------------------------
+# Theme selection
+# ---------------------------------------------------------------
+dark_mode = st.session_state.get("dark_mode", False)
+
+bg_color = "#111827" if dark_mode else "#FFFFFF"
+text_color = "#F3F4F6" if dark_mode else "#000000"
+rule_color = "#9CA3AF" if dark_mode else "#000000"
 
 # ---------------------------------------------------------------
-# Plain styling: white background, black text, no effects
+# Styling
 # ---------------------------------------------------------------
 st.markdown(
-    """
+    f"""
     <style>
-        /* White background */
-        .stApp {
-            background-color: #FFFFFF;
-        }
+        /* Page and text colors */
+        .stApp,
+        [data-testid="stAppViewContainer"] {{
+            background-color: {bg_color};
+            color: {text_color};
+        }}
 
-        /* Black text everywhere */
-        html, body, [class*="css"] {
-            color: #000000;
-        }
-        h1, h2, h3, h4, h5, h6, p, li, span, div, strong, em, a,
-        label, .stMarkdown, .stMarkdown * {
-            color: #000000 !important;
-        }
+        html, body, [class*="css"],
+        h1, h2, h3, h4, h5, h6, p, li, span, div, strong, em,
+        label, .stMarkdown, .stMarkdown * {{
+            color: {text_color} !important;
+        }}
 
-        /* Simple black horizontal rule */
-        hr {
-            border: none;
-            border-top: 1px solid #000000;
-            margin: 0.6rem 0 1rem 0;
-        }
-
-        /* Reduce excessive spacing */
-        .block-container {
-            padding-top: 2.5rem;
-            padding-bottom: 3rem;
-            max-width: 900px;
-        }
-
-        /* Links: black and underlined */
-        a {
-            color: #000000 !important;
+        /* Links */
+        a {{
+            color: {text_color} !important;
             text-decoration: underline;
-        }
+        }}
 
-        /* Right-aligned meta text */
-        .meta {
+        /* Section dividers */
+        hr {{
+            border: none;
+            border-top: 1px solid {rule_color};
+            margin: 0.35rem 0 0.6rem 0;
+        }}
+
+        /* Compact page layout */
+        .block-container {{
+            padding-top: 1.5rem;
+            padding-bottom: 2rem;
+            max-width: 900px;
+        }}
+
+        [data-testid="stVerticalBlock"] {{
+            gap: 0.5rem;
+        }}
+
+        .stMarkdown p,
+        .stMarkdown ul {{
+            margin-top: 0.1rem;
+            margin-bottom: 0.3rem;
+        }}
+
+        /* Smaller section headings */
+        .stMarkdown h2 {{
+            font-size: 1.25rem;
+            line-height: 1.35;
+            margin-top: 0.55rem;
+            margin-bottom: 0.15rem;
+        }}
+
+        /* Right-aligned metadata */
+        .meta {{
             text-align: right;
-            font-size: 0.92rem;
-            line-height: 1.4;
-        }
+            font-size: 0.88rem;
+            line-height: 1.35;
+        }}
     </style>
     """,
     unsafe_allow_html=True,
@@ -67,19 +105,25 @@ st.markdown(
 # Helper functions
 # ---------------------------------------------------------------
 def section(title: str) -> None:
-    """Print a section heading with a black divider."""
+    """Print a compact section heading with a divider."""
     st.markdown(f"## {title}")
     st.markdown("<hr>", unsafe_allow_html=True)
 
 
-def entry(title: str, subtitle: str = "", location: str = "", date: str = "") -> None:
+def entry(
+    title: str,
+    subtitle: str = "",
+    location: str = "",
+    date: str = "",
+) -> None:
     """Two-column entry: title/subtitle on the left, location/date on the right."""
     left, right = st.columns([3, 1])
+
     with left:
         st.markdown(f"**{title}**")
         if subtitle:
-            # unsafe_allow_html=True so <br> in subtitle creates a new line
             st.markdown(subtitle, unsafe_allow_html=True)
+
     with right:
         meta = "<br>".join(x for x in (location, date) if x)
         st.markdown(f'<div class="meta">{meta}</div>', unsafe_allow_html=True)
@@ -89,17 +133,26 @@ def bullets(items) -> None:
     """Print a plain bullet list."""
     st.markdown("\n".join(f"- {item}" for item in items))
 
-
 # ---------------------------------------------------------------
 # Header / contact
 # ---------------------------------------------------------------
-st.markdown("# Poon Cheuk Man, Andy")
+name_col, toggle_col = st.columns([5, 1])
+
+with name_col:
+    st.markdown("# Poon Cheuk Man, Andy")
+
+with toggle_col:
+    dark_mode = st.toggle(
+        "Dark mode",
+        key="dark_mode",
+        value=False,
+    )
+
 st.markdown(
     "Telephone: (852) 54094972 &nbsp;|&nbsp; "
     "Email: [andypoon.idk.hk@gmail.com](mailto:andypoon.idk.hk@gmail.com)"
 )
 st.markdown("<hr>", unsafe_allow_html=True)
-
 # ---------------------------------------------------------------
 # Education
 # ---------------------------------------------------------------
